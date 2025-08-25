@@ -41,3 +41,4 @@ db.proyecciones.aggregate([
     }
   }
 ])
+//fabian las fotos para el readme
