@@ -12,8 +12,6 @@ try {
     const nuevoBoleto = {
     sala: salaNombre,
     dia: fechaEvento,
-    fechaCompra: new Date(),
-    formato: sala.formato 
   };
    const resultadoUpdate = db.clientes.updateOne(
     { _id: clienteId },
@@ -28,12 +26,9 @@ try {
     { $inc: { capacidad: -1 } } 
   );
    session.commitTransaction();
-  print("✅ Boleto comprado exitosamente!");
+  print("Boleto comprado exitosamente!");
   print("Cliente: Juan Pérez");
   print("Sala: " + salaNombre);
-  print("Fecha: " + fechaEvento);
-  print("Formato: " + sala.formato);
-
 } catch (error) {
   session.abortTransaction();
   print(" Error en la transacción: " + error.message);
