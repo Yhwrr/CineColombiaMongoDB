@@ -1,40 +1,52 @@
 const session = db.getMongo().startSession();
 const dbSession = session.getDatabase("cinecolombiano");
-session.startTransaction(); 
-try {
-      const clienteId = ObjectId("68ac5110c8c1c0b05018fc49");
-      const salaNombre = "Sala Principal";
-      const fechaEvento = "2025-06-25";
-      const sala = db.salas.findOne({ nombre: salaNombre });
-  if (!sala) {
-    throw new Error("Sala no encontrada: " + salaNombre);
-  }
-    const nuevoBoleto = {
-    sala: salaNombre,
-    dia: fechaEvento,
-  };
-   const resultadoUpdate = db.clientes.updateOne(
-    { _id: clienteId },
-    { $push: { boletos_comprados: nuevoBoleto } }
-  );
 
-  if (resultadoUpdate.modifiedCount === 0) {
-    throw new Error("Cliente no encontrado o no se pudo actualizar");
-  }
-  const actualizarSala = db.salas.updateOne(
-    { nombre: salaNombre },
-    { $inc: { capacidad: -1 } } 
-  );
-   session.commitTransaction();
-  print("Boleto comprado exitosamente!");
-  print("Cliente: Juan Pérez");
-  print("Sala: " + salaNombre);
-} catch (error) {
-  session.abortTransaction();
-  print(" Error en la transacción: " + error.message);
-  
+try {
+    session.startTransaction();
+
+    const clienteId = ObjectId("68ac5110c8c1c0b05018fc49");
+    const salaNombre = "Sala Principal";
+    const fechaEvento = "2025-06-25";
+
+    const sala = dbSession.salas.findOne({ nombre: salaNombre });
+    if (!sala) {
+        throw new Error("Sala no encontrada: " + salaNombre);
+    }
+
+    const nuevoBoleto = {
+        sala: salaNombre,
+        dia: fechaEvento,
+    };
+
+    const resultadoUpdate = dbSession.clientes.updateOne(
+        { _id: clienteId },
+        { $push: { boletos_comprados: nuevoBoleto } }
+    );
+
+    if (resultadoUpdate.modifiedCount === 0) {
+        throw new Error("Cliente no encontrado o no se pudo actualizar");
+    }
+
+    const actualizarSala = dbSession.salas.updateOne(
+        { nombre: salaNombre },
+        { $inc: { capacidad: -1 } }
+    );
+
+    if (actualizarSala.modifiedCount === 0) {
+        throw new Error("No se pudo actualizar la capacidad de la sala");
+    }
+
+    session.commitTransaction();
+    print("Boleto comprado exitosamente!");
+    print("Cliente: Juan Pérez");
+    print("Sala: " + salaNombre);
+    print("Fecha: " + fechaEvento);
+    print("Nueva capacidad de la sala: " + (sala.capacidad - 1));
+
+
+    
 } finally {
-  session.endSession();
+    session.endSession();
 }
 
 
